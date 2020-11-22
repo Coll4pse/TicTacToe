@@ -12,36 +12,34 @@ namespace Domain.Domain
         {
             get
             {
-                var copyGrid = new CellInstance[Size.Width, Size.Height];
-                Array.Copy(grid, copyGrid, Size.Width * Size.Height);
+                var copyGrid = new CellInstance[Size, Size];
+                Array.Copy(grid, copyGrid, Size * Size);
                 return copyGrid;
             }
         }
 
-        public Size Size { get; }
+        public int Size { get; }
 
-        public GameGrid(Size size)
+        public GameGrid(int size)
         {
             Size = size;
-            grid = new CellInstance[size.Width, size.Height];
+            grid = new CellInstance[size, size];
         }
 
-        private GameGrid(CellInstance[,] grid) : this(grid.GetLength(0), grid.GetLength(1))
+        private GameGrid(GameGrid grid) : this(grid.Size)
         {
-            for (var i = 0; i < Size.Width; i++)
+            for (var i = 0; i < Size; i++)
             {
-                for (var j = 0; j < Size.Height; j++)
+                for (var j = 0; j < Size; j++)
                 {
-                    this.grid[i, j] = grid[i, j];
+                    this.grid[i, j] = grid.grid[i, j];
                 }
             }
         }
-
-        public GameGrid(int rowCount, int columnCount) : this(new Size(rowCount, columnCount)) {}
-
+        
         public GameGrid SetCellInstance(Point point, CellInstance instance)
         {
-            var result = new GameGrid(Grid);
+            var result = new GameGrid(this);
             result.grid[point.X, point.Y] = instance;
             return result;
         }
