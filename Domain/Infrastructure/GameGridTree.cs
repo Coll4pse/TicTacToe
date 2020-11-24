@@ -4,6 +4,9 @@ using Domain.Domain;
 
 namespace Domain.Infrastructure
 {
+    /// <summary>
+    /// Класс дерева сеток крестиков-ноликов вместе со счетом возможных исходов с текущей сетки
+    /// </summary>
     public class GameGridTree
     {
         public GameGridTree Parent { get; private set; }

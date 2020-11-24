@@ -5,6 +5,9 @@ using Domain.Infrastructure;
 
 namespace Domain.Domain
 {
+    /// <summary>
+    /// Класс представляющий собой сущность игры
+    /// </summary>
     public class Game : Entity<int>
     {
         private readonly IUi ui;

@@ -1,5 +1,8 @@
 namespace Domain.Infrastructure
 {
+    /// <summary>
+    /// Класс счета побед крестиков и ноликов, и ничьих
+    /// </summary>
     public class Score
     {
         public int CrossesWinCount;

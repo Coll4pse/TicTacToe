@@ -5,6 +5,9 @@ using Domain.Infrastructure;
 
 namespace Domain.Domain
 {
+    /// <summary>
+    /// Класс представляющий собой сетку игры
+    /// </summary>
     public class GameGrid : ValueType<GameGrid>
     {
         private readonly CellInstance[,] grid;

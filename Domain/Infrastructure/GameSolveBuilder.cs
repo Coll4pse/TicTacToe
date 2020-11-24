@@ -5,6 +5,9 @@ using Domain.Domain;
 
 namespace Domain.Infrastructure
 {
+    /// <summary>
+    /// Класс содержащий методы для построения полного дерева решений крестиков-ноликов
+    /// </summary>
     public static class GameSolveBuilder
     {
         private const CellInstance StartInstance = CellInstance.Cross;
@@ -43,18 +46,5 @@ namespace Domain.Infrastructure
                         throw new ArgumentOutOfRangeException();
                 }
             }
-
-        private static IEnumerable<Point> GetEmptyCells(GameGrid grid)
-        {
-            for (var i = 0; i < grid.Size; i++)
-            {
-                for (var j = 0; j < grid.Size; j++)
-                {
-                    if (grid.Grid[i, j] != CellInstance.Empty) continue;
-                    yield return new Point(i, j);
-                }
-            }
-            
-        }
     }
 }
