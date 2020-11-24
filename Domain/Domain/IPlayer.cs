@@ -4,6 +4,6 @@ namespace Domain.Domain
 {
     public interface IPlayer
     {
-        Point MakeMove(GameGrid gameGrid);
+        Point MakeMove(GameGrid gameGrid, CellInstance instance);
     }
 }

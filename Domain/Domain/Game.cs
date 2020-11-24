@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Linq;
 using Domain.Infrastructure;
 
 namespace Domain.Domain
@@ -46,7 +47,7 @@ namespace Domain.Domain
             
             while (Status != GameStatus.Ended || Status != GameStatus.Aborted)
             {
-                var point = CurrentPlayer.MakeMove(GameGrid);
+                var point = CurrentPlayer.MakeMove(GameGrid, players[CurrentPlayer]);
                 GameGrid = GameGrid.SetCellInstance(point ,players[CurrentPlayer]);
                 ui.DrawInstance(point, players[CurrentPlayer]);
                 StepsHistory.Add(GameGrid);
@@ -78,7 +79,8 @@ namespace Domain.Domain
         
         public static GameWinner CheckWinner(GameGrid grid)
         {
-            if (TryGetWinnerFromMainDiagonal(grid, out var winner))
+            GameWinner winner;
+            if (TryGetWinnerFromMainDiagonal(grid, out winner))
                 return winner;
             if (TryGetWinnerFromSecondaryDiagonal(grid, out winner))
                 return winner;
@@ -86,7 +88,7 @@ namespace Domain.Domain
                 return winner;
             if (TryGetWinnerFromColumns(grid, out winner))
                 return winner;
-            return IsGameGridFilled(grid) ? GameWinner.Draw : GameWinner.None;
+            return !grid.GetEmptyCells().Any() ? GameWinner.Draw : GameWinner.None;
         }
 
         private static bool TryGetWinnerFromMainDiagonal(GameGrid grid, out GameWinner winner)
@@ -113,7 +115,7 @@ namespace Domain.Domain
             winner = GameWinner.None;
             
             var arr = grid.Grid;
-            var possibleWinner = arr[grid.Size - 1, 0];
+            var possibleWinner = arr[0, grid.Size - 1];
             
             if (possibleWinner == CellInstance.Empty) return false;
             
@@ -135,6 +137,7 @@ namespace Domain.Domain
             for (int i = 0; i < grid.Size; i++)
             {
                 var possibleWinner = arr[i, 0];
+                if (possibleWinner == CellInstance.Empty) continue;
                 for (int j = 1; j < grid.Size; j++)
                 {
                     if (possibleWinner != arr[i, j])
@@ -158,6 +161,7 @@ namespace Domain.Domain
             for (int i = 0; i < grid.Size; i++)
             {
                 var possibleWinner = arr[0, i];
+                if (possibleWinner == CellInstance.Empty) continue;
                 for (int j = 1; j < grid.Size; j++)
                 {
                     if (possibleWinner != arr[j, i])
@@ -171,20 +175,6 @@ namespace Domain.Domain
             }
 
             return false;
-        }
-
-        private static bool IsGameGridFilled(GameGrid grid)
-        {
-            var arr = grid.Grid;
-            for (int i = 0; i < grid.Size; i++)
-            {
-                for (int j = 0; j < grid.Size; j++)
-                {
-                    if (arr[i, j] == CellInstance.Empty) return false;
-                }
-            }
-
-            return true;
         }
         #endregion
     }

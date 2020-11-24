@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.Drawing;
 using Domain.Infrastructure;
 
@@ -42,6 +43,18 @@ namespace Domain.Domain
             var result = new GameGrid(this);
             result.grid[point.X, point.Y] = instance;
             return result;
+        }
+
+        public IEnumerable<Point> GetEmptyCells()
+        {
+            for (int i = 0; i < Size; i++)
+            {
+                for (int j = 0; j < Size; j++)
+                {
+                    if (grid[i, j] != CellInstance.Empty) continue;
+                    yield return new Point(i, j);
+                }
+            }
         }
     }
 }
