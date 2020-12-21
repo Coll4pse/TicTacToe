@@ -10,8 +10,6 @@ namespace Domain.Domain
     /// </summary>
     public class Game : Entity<int>
     {
-        private readonly IUi ui;
-
         private readonly Dictionary<IPlayer, CellInstance> players;
         public GameGrid GameGrid { get; private set; }
         
@@ -25,9 +23,9 @@ namespace Domain.Domain
         
         public GameWinner Winner { get; private set; }
         
-        public List<GameGrid> StepsHistory { get; }
-
-        public Game(int id, int girdSize, IPlayer crossesPlayer, IPlayer noughtsPlayer, IUi ui) : base(id)
+        public List<GameGrid> StepsHistory { get; } = new List<GameGrid>();
+        
+        public Game(int id, int girdSize, IPlayer crossesPlayer, IPlayer noughtsPlayer) : base(id)
         {
             GameGrid = new GameGrid(girdSize);
             StepsHistory.Add(GameGrid);
@@ -37,7 +35,6 @@ namespace Domain.Domain
             };
             CrossesPlayer = crossesPlayer;
             NoughtsPlayer = noughtsPlayer;
-            this.ui = ui;
         }
 
         public void Start()
@@ -48,11 +45,12 @@ namespace Domain.Domain
             CurrentPlayer = CrossesPlayer;
             Status = GameStatus.InProcess;
             
-            while (Status != GameStatus.Ended || Status != GameStatus.Aborted)
+            while (Status == GameStatus.InProcess)
             {
                 var point = CurrentPlayer.MakeMove(GameGrid, players[CurrentPlayer]);
-                GameGrid = GameGrid.SetCellInstance(point ,players[CurrentPlayer]);
-                ui.DrawInstance(point, players[CurrentPlayer]);
+                if (Status == GameStatus.Aborted)
+                    break;
+                GameGrid = GameGrid.SetCellInstance(point, players[CurrentPlayer]);
                 StepsHistory.Add(GameGrid);
                 NextCurrentPlayer();
                 TryChangeStatus();

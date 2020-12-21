@@ -7,6 +7,7 @@ namespace Domain.Domain
     /// </summary>
     public interface IUi
     {
-        void DrawInstance(Point point, CellInstance instance);
+        void DrawInstance(GameGrid gameGrid);
+        Point GetMove();
     }
 }

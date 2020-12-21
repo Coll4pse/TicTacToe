@@ -59,5 +59,21 @@ namespace Domain.Domain
                 }
             }
         }
+
+        public bool Equals(GameGrid gameGrid)
+        {
+            if (Size != gameGrid.Size)
+                return false;
+            for (int i = 0; i < Size; i++)
+            {
+                for (int j = 0; j < Size; j++)
+                {
+                    if (grid[i, j] != gameGrid.grid[i, j])
+                        return false;
+                }
+            }
+
+            return true;
+        }
     }
 }
