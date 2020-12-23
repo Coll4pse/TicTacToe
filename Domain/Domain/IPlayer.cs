@@ -3,7 +3,7 @@
 namespace Domain.Domain
 {
     /// <summary>
-    /// Базовый интерфейс сущности игрока
+    ///     Базовый интерфейс сущности игрока
     /// </summary>
     public interface IPlayer
     {

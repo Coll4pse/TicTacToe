@@ -6,25 +6,12 @@ using Domain.Infrastructure;
 namespace Domain.Domain
 {
     /// <summary>
-    /// Класс представляющий собой сущность игры
+    ///     Класс представляющий собой сущность игры
     /// </summary>
     public class Game : Entity<int>
     {
         private readonly Dictionary<IPlayer, CellInstance> players;
-        public GameGrid GameGrid { get; private set; }
-        
-        public IPlayer CurrentPlayer { get; private set; }
 
-        public IPlayer CrossesPlayer { get; }
-
-        public IPlayer NoughtsPlayer { get; }
-        
-        public GameStatus Status { get; private set; }
-        
-        public GameWinner Winner { get; private set; }
-        
-        public List<GameGrid> StepsHistory { get; } = new List<GameGrid>();
-        
         public Game(int id, int girdSize, IPlayer crossesPlayer, IPlayer noughtsPlayer) : base(id)
         {
             GameGrid = new GameGrid(girdSize);
@@ -37,20 +24,37 @@ namespace Domain.Domain
             NoughtsPlayer = noughtsPlayer;
         }
 
+        public GameGrid GameGrid { get; private set; }
+
+        public IPlayer CurrentPlayer { get; private set; }
+
+        public IPlayer CrossesPlayer { get; }
+
+        public IPlayer NoughtsPlayer { get; }
+
+        public GameStatus Status { get; private set; }
+
+        public GameWinner Winner { get; private set; }
+
+        public List<GameGrid> StepsHistory { get; } = new List<GameGrid>();
+
+        public event EventHandler<GameGrid> Move;
+
         public void Start()
         {
             if (Status != GameStatus.ReadyToStart)
                 throw new InvalidOperationException($"Game isn't ready to start. Status: {Status}");
-            
+
             CurrentPlayer = CrossesPlayer;
             Status = GameStatus.InProcess;
-            
+
             while (Status == GameStatus.InProcess)
             {
                 var point = CurrentPlayer.MakeMove(GameGrid, players[CurrentPlayer]);
                 if (Status == GameStatus.Aborted)
                     break;
                 GameGrid = GameGrid.SetCellInstance(point, players[CurrentPlayer]);
+                Move?.Invoke(this, GameGrid);
                 StepsHistory.Add(GameGrid);
                 NextCurrentPlayer();
                 TryChangeStatus();
@@ -61,8 +65,8 @@ namespace Domain.Domain
         {
             Status = GameStatus.Aborted;
         }
-        
-        
+
+
         private void NextCurrentPlayer()
         {
             CurrentPlayer = CurrentPlayer == CrossesPlayer ? NoughtsPlayer : CrossesPlayer;
@@ -77,7 +81,7 @@ namespace Domain.Domain
         }
 
         #region Static Methods
-        
+
         public static GameWinner CheckWinner(GameGrid grid)
         {
             GameWinner winner;
@@ -95,17 +99,15 @@ namespace Domain.Domain
         private static bool TryGetWinnerFromMainDiagonal(GameGrid grid, out GameWinner winner)
         {
             winner = GameWinner.None;
-            
+
             var arr = grid.Grid;
             var possibleWinner = arr[0, 0];
-            
+
             if (possibleWinner == CellInstance.Empty) return false;
-            
+
             for (var i = 1; i < grid.Size; i++)
-            {
                 if (arr[i, i] != possibleWinner)
                     return false;
-            }
 
             winner = possibleWinner == CellInstance.Cross ? GameWinner.Crosses : GameWinner.Noughts;
             return true;
@@ -114,17 +116,15 @@ namespace Domain.Domain
         private static bool TryGetWinnerFromSecondaryDiagonal(GameGrid grid, out GameWinner winner)
         {
             winner = GameWinner.None;
-            
+
             var arr = grid.Grid;
             var possibleWinner = arr[0, grid.Size - 1];
-            
+
             if (possibleWinner == CellInstance.Empty) return false;
-            
+
             for (var i = 1; i < grid.Size; i++)
-            {
                 if (arr[i, grid.Size - i - 1] != possibleWinner)
                     return false;
-            }
 
             winner = possibleWinner == CellInstance.Cross ? GameWinner.Crosses : GameWinner.Noughts;
             return true;
@@ -135,11 +135,11 @@ namespace Domain.Domain
             winner = GameWinner.None;
 
             var arr = grid.Grid;
-            for (int i = 0; i < grid.Size; i++)
+            for (var i = 0; i < grid.Size; i++)
             {
                 var possibleWinner = arr[i, 0];
                 if (possibleWinner == CellInstance.Empty) continue;
-                for (int j = 1; j < grid.Size; j++)
+                for (var j = 1; j < grid.Size; j++)
                 {
                     if (possibleWinner != arr[i, j])
                         break;
@@ -159,11 +159,11 @@ namespace Domain.Domain
             winner = GameWinner.None;
 
             var arr = grid.Grid;
-            for (int i = 0; i < grid.Size; i++)
+            for (var i = 0; i < grid.Size; i++)
             {
                 var possibleWinner = arr[0, i];
                 if (possibleWinner == CellInstance.Empty) continue;
-                for (int j = 1; j < grid.Size; j++)
+                for (var j = 1; j < grid.Size; j++)
                 {
                     if (possibleWinner != arr[j, i])
                         break;
@@ -177,6 +177,7 @@ namespace Domain.Domain
 
             return false;
         }
+
         #endregion
     }
 }

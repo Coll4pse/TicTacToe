@@ -1,6 +1,7 @@
 using System.Drawing;
-using NUnit.Framework;
 using Domain.Domain;
+using NUnit.Framework;
+
 namespace Tests
 {
     public class CheckWinnerTests
@@ -34,7 +35,7 @@ namespace Tests
             var grid = MakeSecondaryDiagonalGrid(size, CellInstance.Cross);
             Assert.IsTrue(Game.CheckWinner(grid) == GameWinner.Crosses);
         }
-        
+
         [Test]
         [TestCase(3)]
         [TestCase(5)]
@@ -59,7 +60,7 @@ namespace Tests
             var grid = MakeRowFilledGrid(size, row, CellInstance.Cross);
             Assert.IsTrue(Game.CheckWinner(grid) == GameWinner.Crosses);
         }
-        
+
         [Test]
         [TestCase(3, 0)]
         [TestCase(3, 1)]
@@ -74,7 +75,7 @@ namespace Tests
             var grid = MakeRowFilledGrid(size, row, CellInstance.Nought);
             Assert.IsTrue(Game.CheckWinner(grid) == GameWinner.Noughts);
         }
-        
+
         [Test]
         [TestCase(3, 0)]
         [TestCase(3, 1)]
@@ -89,7 +90,7 @@ namespace Tests
             var grid = MakeColumnFilledGrid(size, column, CellInstance.Cross);
             Assert.IsTrue(Game.CheckWinner(grid) == GameWinner.Crosses);
         }
-        
+
         [Test]
         [TestCase(3, 0)]
         [TestCase(3, 1)]
@@ -115,10 +116,7 @@ namespace Tests
         private static GameGrid MakeSecondaryDiagonalGrid(int size, CellInstance instance)
         {
             var grid = new GameGrid(size);
-            for (int i = 0; i < size; i++)
-            {
-                grid = grid.SetCellInstance(new Point(i, size - i - 1), instance);
-            }
+            for (var i = 0; i < size; i++) grid = grid.SetCellInstance(new Point(i, size - i - 1), instance);
 
             return grid;
         }
@@ -126,10 +124,7 @@ namespace Tests
         private static GameGrid MakeMainDiagonalGrid(int size, CellInstance instance)
         {
             var grid = new GameGrid(size);
-            for (int i = 0; i < size; i++)
-            {
-                grid = grid.SetCellInstance(new Point(i, i), instance);
-            }
+            for (var i = 0; i < size; i++) grid = grid.SetCellInstance(new Point(i, i), instance);
 
             return grid;
         }
@@ -137,28 +132,22 @@ namespace Tests
         private static GameGrid MakeRowFilledGrid(int size, int row, CellInstance instance)
         {
             var grid = new GameGrid(size);
-            for (int i = 0; i < size; i++)
-            {
-                grid = grid.SetCellInstance(new Point(row, i), instance);
-            }
+            for (var i = 0; i < size; i++) grid = grid.SetCellInstance(new Point(row, i), instance);
 
             return grid;
         }
-        
+
         private static GameGrid MakeColumnFilledGrid(int size, int column, CellInstance instance)
         {
             var grid = new GameGrid(size);
-            for (int i = 0; i < size; i++)
-            {
-                grid = grid.SetCellInstance(new Point(i, column), instance);
-            }
+            for (var i = 0; i < size; i++) grid = grid.SetCellInstance(new Point(i, column), instance);
 
             return grid;
         }
 
         private static GameGrid MakeFullFilledGridWithoutWinner()
         {
-            var gridTemplate = new CellInstance[,]
+            var gridTemplate = new[,]
             {
                 {CellInstance.Cross, CellInstance.Nought, CellInstance.Nought, CellInstance.Cross},
                 {CellInstance.Nought, CellInstance.Nought, CellInstance.Cross, CellInstance.Cross},
@@ -166,13 +155,9 @@ namespace Tests
                 {CellInstance.Nought, CellInstance.Nought, CellInstance.Nought, CellInstance.Cross}
             };
             var grid = new GameGrid(gridTemplate.GetLength(0));
-            for (int i = 0; i < grid.Size; i++)
-            {
-                for (int j = 0; j < grid.Size; j++)
-                {
-                    grid = grid.SetCellInstance(new Point(i, j), gridTemplate[i, j]);
-                }
-            }
+            for (var i = 0; i < grid.Size; i++)
+            for (var j = 0; j < grid.Size; j++)
+                grid = grid.SetCellInstance(new Point(i, j), gridTemplate[i, j]);
 
             return grid;
         }

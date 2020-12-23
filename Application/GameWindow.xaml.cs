@@ -3,33 +3,95 @@ using System.Threading;
 using System.Threading.Tasks;
 using System.Windows;
 using System.Windows.Controls;
-using System.Windows.Controls.Primitives;
 using System.Windows.Input;
 using System.Windows.Media;
 using System.Windows.Shapes;
 using Domain.Domain;
-using Domain.Infrastructure;
 using Point = System.Drawing.Point;
 
 namespace Application
 {
     public partial class GameWindow : Window, IUi
     {
+        private readonly Ai ai;
+
+        private readonly Button[,] buttons;
+
+        private readonly bool isPlayerNoughts;
+
+        private readonly Player player;
+
+        private readonly int size;
+        
         private bool isAborted;
-        
-        private Button[,] buttons;
-        public int Size { get; }
-        
-        public GameWindow(int size)
+
+        public GameWindow(int size, string nick, Ai ai, bool isPlayerNoughts)
         {
-            Size = size;
+            this.size = size;
+            player = new Player(nick, this);
+            this.ai = ai;
+            this.isPlayerNoughts = isPlayerNoughts;
+            buttons = new Button[size, size];
             InitializeComponent();
+        }
+
+        public void DrawInstance(GameGrid gameGrid)
+        {
+            if (isAborted) return;
+
+            var grid = gameGrid.Grid;
+            for (var i = 0; i < size; i++)
+            for (var j = 0; j < size; j++)
+                switch (grid[i, j])
+                {
+                    case CellInstance.Empty:
+                        break;
+                    case CellInstance.Cross:
+                        Dispatcher.Invoke(() =>
+                        {
+                            buttons[i, j].IsEnabled = false;
+                            DrawCross(buttons[i, j]);
+                        });
+                        break;
+                    case CellInstance.Nought:
+                        Dispatcher.Invoke(() =>
+                        {
+                            buttons[i, j].IsEnabled = false;
+                            DrawNought(buttons[i, j]);
+                        });
+                        break;
+                }
+        }
+
+        public Point GetMove()
+        {
+            Button button = null;
+
+            MouseButtonEventHandler func = (sender, args) =>
+            {
+                if (args.Source is Button b && args.ChangedButton == MouseButton.Left)
+                    button = b;
+            };
+
+            grid.PreviewMouseUp += func;
+
+            while (button == null) Thread.Sleep(100);
+
+            grid.PreviewMouseUp -= func;
+
+            for (var i = 0; i < size; i++)
+            for (var j = 0; j < size; j++)
+                if (ReferenceEquals(buttons[i, j], button))
+                    return new Point(i, j);
+            throw new ApplicationException();
         }
 
         private void OnUGridLoad(object sender, RoutedEventArgs args)
         {
-            grid.Rows = grid.Columns = Size;
+            grid.Rows = grid.Columns = size;
             FillButtons();
+            playerInstance.Text = isPlayerNoughts ? "Нолики" : "Крестики";
+            aiInstance.Text = isPlayerNoughts ? "Крестики" : "Нолики";
             StartGameAsync();
         }
 
@@ -42,9 +104,10 @@ namespace Application
 
         private async void StartGameAsync()
         {
-            var player = new Player("Collapse", this);
-            var ai = new Ai("1");
-            var game = new Game(0, Size, player, ai);
+            var game = isPlayerNoughts
+                ? new Game(0, size, ai, player)
+                : new Game(0, size, player, ai);
+            game.Move += (sender, gameGrid) => DrawInstance(gameGrid);
             abort.Click += (sender, args) =>
             {
                 game.Abort();
@@ -53,18 +116,18 @@ namespace Application
             };
             await Task.Run(() => game.Start());
             exit.IsEnabled = true;
+            if (!isAborted)
+                MessageBox.Show(game.Winner == GameWinner.Draw ? "Ничья" : $"Победили {game.Winner}",
+                    "Реузльтаты", MessageBoxButton.OK);
         }
 
         private void FillButtons()
         {
-            buttons = new Button[Size, Size];
-            for (var i = 0; i < Size; i++)
+            for (var i = 0; i < size; i++)
+            for (var j = 0; j < size; j++)
             {
-                for (int j = 0; j < Size; j++)
-                {
-                    buttons[i, j] = new Button();
-                    grid.Children.Add(buttons[i, j]);
-                }
+                buttons[i, j] = new Button();
+                grid.Children.Add(buttons[i, j]);
             }
         }
 
@@ -82,7 +145,7 @@ namespace Application
                 X2 = canvas.Width,
                 Y2 = canvas.Height,
                 Stroke = Brushes.Black,
-                StrokeThickness = 2.5,
+                StrokeThickness = 2.5
             });
             canvas.Children.Add(new Line
             {
@@ -108,68 +171,6 @@ namespace Application
                 StrokeThickness = 2.5
             };
             button.Content = ellipse;
-        }
-        
-        public void DrawInstance(GameGrid gameGrid)
-        {
-            if (isAborted) return;
-            
-            var grid = gameGrid.Grid;
-            for (int i = 0; i < Size; i++)
-            {
-                for (int j = 0; j < Size; j++)
-                {
-                    switch (grid[i, j])
-                    {
-                        case CellInstance.Empty:
-                            break;
-                        case CellInstance.Cross:
-                            Dispatcher.Invoke(() =>
-                            {
-                                buttons[i, j].IsEnabled = false;
-                                DrawCross(buttons[i, j]);
-                            });
-                            break;
-                        case CellInstance.Nought:
-                            Dispatcher.Invoke(() =>
-                            {
-                                buttons[i, j].IsEnabled = false;
-                                DrawNought(buttons[i, j]);
-                            });
-                            break;
-                    }
-                }
-            }
-        }
-
-        public Point GetMove()
-        {
-            Button button = null;
-
-            MouseButtonEventHandler func = (sender, args) =>
-            {
-                if (args.Source is Button b && args.ChangedButton == MouseButton.Left)
-                    button = b;
-            };
-            
-            grid.PreviewMouseUp += func;
-
-            while (button == null)
-            {
-                Thread.Sleep(100);
-            }
-
-            grid.PreviewMouseUp -= func;
-            
-            for (int i = 0; i < Size; i++)
-            {
-                for (int j = 0; j < Size; j++)
-                {
-                    if (ReferenceEquals(buttons[i, j], button))
-                        return new Point(i, j);
-                }
-            }
-            throw new ApplicationException();
         }
     }
 }

@@ -5,7 +5,7 @@ namespace Domain.Domain
 {
     public class Player : Entity<string>, IPlayer
     {
-        private IUi ui;
+        private readonly IUi ui;
 
         public Player(string nickname, IUi ui) : base(nickname)
         {
@@ -14,10 +14,7 @@ namespace Domain.Domain
 
         public Point MakeMove(GameGrid gameGrid, CellInstance instance)
         {
-            ui.DrawInstance(gameGrid);
-            var pos = ui.GetMove();
-            ui.DrawInstance(gameGrid.SetCellInstance(pos, instance));
-            return pos;
+            return ui.GetMove();
         }
     }
 }

@@ -4,7 +4,7 @@ using System.Reflection;
 namespace Domain.Infrastructure
 {
     /// <summary>
-    /// Базовый класс типов-значений
+    ///     Базовый класс типов-значений
     /// </summary>
     /// <typeparam name="T">Тип наследуещегося класса</typeparam>
     public abstract class ValueType<T>

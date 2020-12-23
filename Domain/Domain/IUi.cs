@@ -3,7 +3,7 @@
 namespace Domain.Domain
 {
     /// <summary>
-    /// Базовый интерфейс для GUI игры
+    ///     Базовый интерфейс для GUI игры
     /// </summary>
     public interface IUi
     {

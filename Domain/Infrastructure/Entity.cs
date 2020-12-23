@@ -3,17 +3,17 @@
 namespace Domain.Infrastructure
 {
     /// <summary>
-    /// Базовый класс DDD сущностей
+    ///     Базовый класс DDD сущностей
     /// </summary>
     /// <typeparam name="TId">Тип идентификатора</typeparam>
     public abstract class Entity<TId>
     {
-        public TId Id { get; }
-
         public Entity(TId id)
         {
             Id = id;
         }
+
+        public TId Id { get; }
 
         protected bool Equals(Entity<TId> other)
         {
@@ -24,7 +24,7 @@ namespace Domain.Infrastructure
         {
             if (ReferenceEquals(null, obj)) return false;
             if (ReferenceEquals(this, obj)) return true;
-            if (obj.GetType() != this.GetType()) return false;
+            if (obj.GetType() != GetType()) return false;
             return Equals((Entity<TId>) obj);
         }
 

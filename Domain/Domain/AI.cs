@@ -1,70 +1,93 @@
 using System;
+using System.Collections.Generic;
 using System.Drawing;
 using System.Linq;
-using Domain.Infrastructure;
 
 namespace Domain.Domain
 {
     /// <summary>
-    /// Класс ИИ выбирающий ход на основе построенного полного древа решений
+    ///     Класс ИИ выбирающий ход на основе построенного полного древа решений
     /// </summary>
-    public class Ai : Entity<string>, IPlayer
+    public class Ai : IPlayer
     {
-        private GameGridTree solveTree;
-        
-        public Ai(string id) : base(id)
+        private static readonly Dictionary<GameWinner, int> crossScoreMap = new Dictionary<GameWinner, int>
         {
-        }
+            {GameWinner.Crosses, 100},
+            {GameWinner.Noughts, -100},
+            {GameWinner.Draw, 0}
+        };
+
+        private static readonly Dictionary<GameWinner, int> noughtsScoreMap = new Dictionary<GameWinner, int>
+        {
+            {GameWinner.Crosses, -100},
+            {GameWinner.Noughts, 100},
+            {GameWinner.Draw, 0}
+        };
+
+        private static readonly Dictionary<CellInstance, CellInstance> nextInstance =
+            new Dictionary<CellInstance, CellInstance>
+            {
+                {CellInstance.Cross, CellInstance.Nought},
+                {CellInstance.Nought, CellInstance.Cross}
+            };
         
         public Point MakeMove(GameGrid gameGrid, CellInstance instance)
         {
-            solveTree ??= GameSolveBuilder.BuildSolveTree(gameGrid.Size);
-            ActualizeSolveTree(gameGrid);
-            DropSolveTree(instance);
-            return FindMovePoint(gameGrid);
+            return BestMove(gameGrid, instance);
         }
 
-        /// <summary>
-        /// Метод который ищет разницу между акутальной сеткой и сеткой в текущем узле дерева решений
-        /// </summary>
-        /// <param name="sourceGrid">Актуальная сетка</param>
-        /// <returns>Возвращает точку в которой сетки различны</returns>
-        private Point FindMovePoint(GameGrid sourceGrid)
+        private static Point BestMove(GameGrid gameGrid, CellInstance instance)
         {
-            for (int i = 0; i < sourceGrid.Size; i++)
+            var bestScore = int.MinValue;
+            Point move = default;
+            foreach (var emptyCell in gameGrid.GetEmptyCells())
             {
-                for (int j = 0; j < sourceGrid.Size; j++)
+                var maxDepth = gameGrid.Size == 3 ? 9 : gameGrid.GetEmptyCells().Count() % 5;
+                var score = Minimax(gameGrid.SetCellInstance(emptyCell, instance), 0, maxDepth, nextInstance[instance],
+                    instance == CellInstance.Cross ? crossScoreMap : noughtsScoreMap, false);
+                if (score > bestScore)
                 {
-                    if (sourceGrid.Grid[i, j] != solveTree.Grid.Grid[i, j])
-                        return new Point(i, j);
+                    bestScore = score;
+                    move = emptyCell;
                 }
             }
-            throw new ArithmeticException();
+
+            return move;
         }
 
-        /// <summary>
-        /// Метод продвигающий дерево к наилучшей сетке в древе решений, которая станет следующей актуальной
-        /// </summary>
-        /// <param name="instance"></param>
-        private void DropSolveTree(CellInstance instance)
+        private static int Minimax(GameGrid gameGrid, int depth, int maxDepth, CellInstance instance,
+            Dictionary<GameWinner, int> scoreMap, bool isMaximizing)
         {
-            solveTree = instance switch
-            {
-                CellInstance.Cross => solveTree.Children.OrderBy(c => c.Score.CrossesWinCount).First(),
-                CellInstance.Nought => solveTree.Children.OrderBy(c => c.Score.NoughtsWinCount).First(),
-                CellInstance.Empty => throw new ArgumentException()
-            };
-        }
+            var result = Game.CheckWinner(gameGrid);
+            if (result != GameWinner.None)
+                return scoreMap[result] - depth;
 
-        /// <summary>
-        /// Метод сдвигающий дерево к сетке, соответсвуюшей ходу противника
-        /// </summary>
-        /// <param name="gameGrid">Актуальная сетка игры</param>
-        private void ActualizeSolveTree(GameGrid gameGrid)
-        {
-            if (!gameGrid.Equals(solveTree.Grid))
+            if (depth == maxDepth)
+                return 0;
+
+            if (isMaximizing)
             {
-                solveTree = solveTree.Children.Single(c => c.Grid.Equals(gameGrid));
+                var bestScore = int.MinValue;
+                foreach (var emptyCell in gameGrid.GetEmptyCells())
+                {
+                    var score = Minimax(gameGrid.SetCellInstance(emptyCell, instance), depth + 1, maxDepth,
+                        nextInstance[instance], scoreMap, false);
+                    bestScore = Math.Max(bestScore, score);
+                }
+
+                return bestScore;
+            }
+            else
+            {
+                var bestScore = int.MaxValue;
+                foreach (var emptyCell in gameGrid.GetEmptyCells())
+                {
+                    var score = Minimax(gameGrid.SetCellInstance(emptyCell, instance), depth + 1, maxDepth,
+                        nextInstance[instance], scoreMap, true);
+                    bestScore = Math.Min(bestScore, score);
+                }
+
+                return bestScore;
             }
         }
     }

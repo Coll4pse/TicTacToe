@@ -1,6 +1,6 @@
 using System.Linq;
-using NUnit.Framework;
 using Domain.Infrastructure;
+using NUnit.Framework;
 
 namespace Tests
 {

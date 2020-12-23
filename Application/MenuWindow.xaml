@@ -3,10 +3,34 @@
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
         xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
-        xmlns:local="clr-namespace:Application"
         mc:Ignorable="d"
-        Title="Меню" Height="400" Width="250">
-    <Grid>
-        <Button Width="200" Height="30" Click="Button_Click">Играть</Button>
-    </Grid>
+        Title="Меню" Height="400" Width="250" SizeToContent="WidthAndHeight" ResizeMode="NoResize">
+    <StackPanel>
+        <StackPanel.Resources>
+            <Style TargetType="StackPanel">
+                <Setter Property="Margin" Value="0, 5" />
+            </Style>
+        </StackPanel.Resources>
+        <TextBlock TextAlignment="Center" FontSize="30" FontFamily="Comic Sans MS">Меню</TextBlock>
+        <StackPanel Orientation="Horizontal" HorizontalAlignment="Center">
+            <TextBlock TextAlignment="Center" FontSize="14" FontFamily="Comic Sans MS">Никнейм</TextBlock>
+            <TextBox x:Name="nick" Width="150" MaxLength="14" TextAlignment="Justify" />
+        </StackPanel>
+        <StackPanel Orientation="Horizontal" HorizontalAlignment="Center">
+            <TextBlock Width="50" TextWrapping="Wrap" TextAlignment="Center" VerticalAlignment="Center" FontSize="14"
+                       FontFamily="Comic Sans MS">
+                Размер поля
+            </TextBlock>
+            <TextBox x:Name="gridSize" Width="150" Height="40" IsReadOnly="True" VerticalContentAlignment="Center"
+                     HorizontalContentAlignment="Right">
+                3
+            </TextBox>
+            <StackPanel>
+                <Button Height="20" Width="20" Click="UpSize">^</Button>
+                <Button Height="20" Width="20" Click="DownSize">v</Button>
+            </StackPanel>
+        </StackPanel>
+        <Button Width="200" Height="30" Click="PlayCrosses">Играть за крестики</Button>
+        <Button Width="200" Height="30" Click="PlayNoughts">Играть за нолики</Button>
+    </StackPanel>
 </Window>
