@@ -2,6 +2,7 @@ using System;
 using System.Collections.Generic;
 using System.Drawing;
 using System.Linq;
+using System.Threading.Tasks;
 
 namespace Domain.Domain
 {
@@ -40,7 +41,7 @@ namespace Domain.Domain
         {
             var bestScore = int.MinValue;
             Point move = default;
-            foreach (var emptyCell in gameGrid.GetEmptyCells())
+            Parallel.ForEach(gameGrid.GetEmptyCells(), (emptyCell) =>
             {
                 var maxDepth = gameGrid.Size == 3 ? 9 : gameGrid.GetEmptyCells().Count() % 5;
                 var score = Minimax(gameGrid.SetCellInstance(emptyCell, instance), 0, maxDepth, nextInstance[instance],
@@ -50,8 +51,8 @@ namespace Domain.Domain
                     bestScore = score;
                     move = emptyCell;
                 }
-            }
-
+            }); 
+            
             return move;
         }
 
@@ -68,24 +69,24 @@ namespace Domain.Domain
             if (isMaximizing)
             {
                 var bestScore = int.MinValue;
-                foreach (var emptyCell in gameGrid.GetEmptyCells())
+                Parallel.ForEach(gameGrid.GetEmptyCells(), (emptyCell) =>
                 {
                     var score = Minimax(gameGrid.SetCellInstance(emptyCell, instance), depth + 1, maxDepth,
                         nextInstance[instance], scoreMap, false);
                     bestScore = Math.Max(bestScore, score);
-                }
+                });
 
                 return bestScore;
             }
             else
             {
                 var bestScore = int.MaxValue;
-                foreach (var emptyCell in gameGrid.GetEmptyCells())
+                Parallel.ForEach(gameGrid.GetEmptyCells(), (emptyCell) =>
                 {
                     var score = Minimax(gameGrid.SetCellInstance(emptyCell, instance), depth + 1, maxDepth,
                         nextInstance[instance], scoreMap, true);
                     bestScore = Math.Min(bestScore, score);
-                }
+                });
 
                 return bestScore;
             }
